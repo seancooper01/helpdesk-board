@@ -22,13 +22,13 @@ export default function Board() {
             }
         }
         load();
-        return () => { ifActove = false; };
+        return () => { ifActive = false; };
     }, []);
     if (loading) return <StatusMessage type='loading' message='Loading tickets...' />;
     if (error)   return <StatusMessage type="error" message={`Error: ${error}`} />;
 
 
-// Temporary placeholder until we add real components
+// Temporary placeholder until I add real components
   return (
     <section className="space-y-2">
       <div className="text-sm text-gray-600">Loaded {tickets.length} tickets.</div>
