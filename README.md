@@ -20,6 +20,8 @@ npm run dev
 - [x] Conditional UI: loading, error, empty
 - [x] Queue sidebar: add/remove/clear
 
+```text
 Author
 Sean Cooper
 University Of South Florida 
+```
