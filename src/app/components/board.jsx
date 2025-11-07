@@ -39,6 +39,37 @@ export default function Board() {
         load();
         return () => { isActive = false; };
     }, []);
+
+    //Live update sim
+    useEffect (() => {
+        if (tickets.length === 0) return;
+        
+        const interval = setInterval (() => {
+            setTickets((prev) => {
+                const next = [...prev];
+                const index = Math.floor(Math.random() * next.length);
+                const ticket = { ...next[index] };
+
+                const statusOptions = ['Open', 'In Progress', 'On Hold', 'Resolved'];
+                const priorityOptions = ['Low', 'Medium', 'High', 'Critical'];
+
+                const changeType = Math.random() < 0.5 ? 'status' : 'priority';
+                if (changeType === 'status') {
+                    const nextIndex = 
+                    (statusOptions.indexOf(ticket.status) + 1) % statusOptions.length;
+                    ticket.status = statusOptions[nextIndex];
+                } else {
+                    const nextIndex = 
+                    (priorityOptions.indexOf(ticket.priority) + 1) % priorityOptions.length;
+                    ticket.priority = priorityOptions[nextIndex];
+                }
+                ticket.updatedAt = new Date().toISOString();
+                next[index] = ticket; 
+                return next; 
+            });
+        }, 7000); //every 7 sec
+        return () => clearInterval(interval);
+    }, [tickets.length]);
    
     //Derive visible tickets from filters + search
     const visibleTickets = useMemo(() => {
