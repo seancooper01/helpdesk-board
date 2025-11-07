@@ -3,11 +3,13 @@
 A Mini Helpdesk Board with filters, search, queue, and simulated live updates. 
 
 ## Run
+```text 
 clone repository 
 open new terminal from repo folder
 npm install
 npm run dev
-# open hhtp://localhost:3000
+```
+# open http://localhost:3000
 
 ## Features
 - [x] Next.js App Router structure & API route
