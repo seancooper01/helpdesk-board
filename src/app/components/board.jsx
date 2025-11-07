@@ -27,7 +27,7 @@ export default function Board() {
         let isActive = true;
         async function load() {
             try {
-                const res = await fetch('api/tickets');
+                const res = await fetch('/api/tickets');
                 const data = await res.json();
                 if (isActive) setTickets(data);
             } catch (err) {
@@ -69,7 +69,7 @@ export default function Board() {
             });
         }, 7000); //every 7 sec
         return () => clearInterval(interval);
-    }, [tickets.length]);
+    }, [tickets]);
    
     //Derive visible tickets from filters + search
     const visibleTickets = useMemo(() => {
@@ -88,7 +88,7 @@ export default function Board() {
           setQueue(prev => {
       const { [id]: _, ...rest } = prev;
       return rest;
-        })
+        }); 
         const clearQueue = () => setQueue({}); 
 
     if (loading) return <StatusMessage type='loading' message='Loading tickets...' />;
@@ -96,16 +96,16 @@ export default function Board() {
 
     return (
         <section className='grid gap-4'>
-            <div className='flex flex-col sm:flex-row gap-3 sm:items-center sm:justidy-between'>
+            <div className='flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between'>
                 <div className='flex flex-wrap gap-3'>
-                    <StatusFilter value={search} onChange={setStatus} />
+                    <StatusFilter value={status} onChange={setStatus} />
                     <PriorityFilter value={priority} onChange={setPriority} />
                 </div>
                 <SearchBox value={search} onChange={setSearch} />
             </div>
 
             {visibleTickets.length === 0 ? (
-                <StatusMessage type='info' message='No tickets match your filters.' />
+                <StatusMessage type='empty' message='No tickets match your filters.' />
             ) : (
                 <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
                     <div className='lg:col-span-2'>
