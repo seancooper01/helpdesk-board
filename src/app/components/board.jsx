@@ -1,13 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import StatusMessage from './StatusMessage';
+import StatusFilter from './StatusFilter';
+import PriorityFilter from './PriorityFilter';
+import SearchBox from './SearchBox';
+import TicketList from './TicketList';
+import MyQueueSummary from './MyQueueSummary';
+
 
 export default function Board() {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
+    //Controlled filters + search
+    const [status, setStatus] = useState("All");
+    const [priority, setPriority] = useState('All');
+    const [search, setSearch] = useState('');
+
+    //Queue map:
+    const [queue, setQueue] = useState({});
+
+    //Fetch once
     useEffect(() => {
         let isActive = true;
         async function load() {
@@ -22,24 +37,60 @@ export default function Board() {
             }
         }
         load();
-        return () => { ifActive = false; };
+        return () => { isActive = false; };
     }, []);
+   
+    //Derive visible tickets from filters + search
+    const visibleTickets = useMemo(() => {
+        const q = search.trim().toLowerCase(); 
+        return tickets.filter(t => {
+            const okStatus = status === 'All' || t.status === status; 
+            const okPriority = priority === 'All' || t.priority === priority; 
+            const okSearch = !q || (t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+            return okStatus && okPriority && okSearch;
+        });
+    }, [tickets, status, priority, search]);
+
+    //Queue handlers
+    const addToQueue = (id) => setQueue(prev => ({ ...prev, [id]: true }));
+    const removeFromQueue = (id) =>
+          setQueue(prev => {
+      const { [id]: _, ...rest } = prev;
+      return rest;
+        })
+        const clearQueue = () => setQueue({}); 
+
     if (loading) return <StatusMessage type='loading' message='Loading tickets...' />;
     if (error)   return <StatusMessage type="error" message={`Error: ${error}`} />;
 
+    return (
+        <section className='grid gap-4'>
+            <div className='flex flex-col sm:flex-row gap-3 sm:items-center sm:justidy-between'>
+                <div className='flex flex-wrap gap-3'>
+                    <StatusFilter value={search} onChange={setStatus} />
+                    <PriorityFilter value={priority} onChange={setPriority} />
+                </div>
+                <SearchBox value={search} onChange={setSearch} />
+            </div>
 
-// Temporary placeholder until I add real components
-  return (
-    <section className="space-y-2">
-      <div className="text-sm text-gray-600">Loaded {tickets.length} tickets.</div>
-      <ul className="list-disc pl-5">
-        {tickets.slice(0, 5).map(t => (
-          <li key={t.id}>
-            <strong>{t.title}</strong> — <span className="text-gray-600">{t.status}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="text-xs text-gray-500">(Showing first 5 as a smoke test)</div>
-    </section>
-  );
+            {visibleTickets.length === 0 ? (
+                <StatusMessage type='info' message='No tickets match your filters.' />
+            ) : (
+                <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+                    <div className='lg:col-span-2'>
+                        <TicketList
+                        tickets={visibleTickets}
+                        queueMap={queue}
+                        onAddToQueue={addToQueue}
+                        />
+                    </div>
+                    <MyQueueSummary
+                    items={queue}
+                    onRemove={removeFromQueue}
+                    onClear={clearQueue}
+                    />
+                </div>
+            )}
+        </section>
+    );
 }

@@ -2,7 +2,7 @@
 
 export default function TicketCard({ ticket, queued, onAdd }) {
     const {id, title, description, priority, status, assignee, updatedAt } = ticket; 
-    const didabled = !!queued; 
+    const disabled = !!queued; 
 
     return (
         <article className="border rounded p-3 hover:shadow-sm transition">
